@@ -11,7 +11,12 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api/': 'http://www.tatelzhang.com/music/'
+      '/api': {
+        target: 'http://www.tatelzhang.com/music/',
+        pathRewrite: {
+          '^/api/': ''
+        }
+      }
     },
 
     // Various Dev Server settings

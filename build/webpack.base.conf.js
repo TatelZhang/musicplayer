@@ -75,6 +75,10 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
+      },
+      { //全局加载axios
+        test: require.resolve("axios"), 
+        loader: "expose-loader?$!expose-loader?axios"
       }
     ]
   },
