@@ -1,7 +1,9 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <div class="container">
+    <!-- <img src="./assets/logo.png"> -->
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -12,12 +14,22 @@ export default {
 </script>
 
 <style>
+* {padding: 0; margin: 0; box-sizing: border-box;}
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: '微软雅黑', 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  /* text-align: center; */
+  /* margin-top: 60px; */
+  position: relative;
+  min-width: 1000px;
+  min-height: 800px;
+  height: 100vh;
+}
+#app .container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-image: url(/static/snow.jpg);
 }
 </style>

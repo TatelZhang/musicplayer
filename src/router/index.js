@@ -7,7 +7,14 @@ export default new Router({
     {
       path: '/',
       name: 'HelloWorld',
-      component: (resolve) => require(['@/components/Page'], resolve)
+      component: (resolve) => require(['@/components/Page'], resolve),
+      children: [
+        {
+          path: '/search',
+          name: 'search',
+          component: (resolve) => require(['@/components/Search'], resolve)
+        }
+      ]
     }
   ]
 })
