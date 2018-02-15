@@ -32,4 +32,14 @@ export default {
   height: 100%;
   background-image: url(/static/snow.jpg);
 }
+.img {
+  width: 100%;
+  height: 100%;
+}
+.middle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
 </style>
