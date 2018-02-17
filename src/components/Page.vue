@@ -44,9 +44,10 @@
         this.song.id = 451113443
       },
       changeSong (song) {
-        for(let key in this.song){
-          this.song[key] = song[key]
-        }
+        // for(let key in this.song){
+        //   this.song[key] = song[key]
+        // }
+        this.song = song
       },
       search () {
         this.$router.push({name: 'search', params: {keywords: this.keywords}})
