@@ -67,10 +67,11 @@
           this.pause()
         }
       },
-      url () {  // 音乐url改变 播放音乐
-        if(this.playing){
-          this.music.autoplay = true
-          this.play()
+      url (val) {  // 音乐url改变 播放音乐
+        if(val){
+          this.playing = true
+          // this.music.autoplay = true
+          // this.play()
         }
       },
       id (val) {  // 音乐id改变 获取音乐
@@ -86,17 +87,27 @@
     methods: {
       playSong () {
         this.playing = !this.playing
-        this.getSong()  // 获取音乐url
+        // this.getSong()  // 获取音乐url
       },
       play () {
-        this.music.play()
+        this.music.autoplay = true
+        try {
+          this.music.play()
+        } catch (error) {
+          console.log(error)
+        }
       },
       pause () {
-        this.music.pause()
+        try {
+          this.music.pause()
+        } catch (err){
+          console.log(err)
+        }
       },
       changeSong () {
       },
       getSong () {
+        this.playing = false
         axios.get('/api/music/url', {params: {id: this.id}}).then(({status, data}) => {
           this.url = data.data[0].url
         })

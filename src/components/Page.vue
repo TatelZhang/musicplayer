@@ -11,7 +11,7 @@
       </div>
       <div class="result">
         <!-- <button class="btn" @click="test">点击</button> -->
-        <router-view />
+        <router-view @change-song="changeSong" :keywords="keywords"/>
       </div>
     </div>
     <div class="controller">
@@ -42,6 +42,11 @@
         //   console.log(res)
         // })
         this.song.id = 451113443
+      },
+      changeSong (song) {
+        for(let key in this.song){
+          this.song[key] = song[key]
+        }
       },
       search () {
         this.$router.push({name: 'search', params: {keywords: this.keywords}})

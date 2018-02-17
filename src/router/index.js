@@ -8,6 +8,7 @@ export default new Router({
       path: '/',
       name: 'HelloWorld',
       component: (resolve) => require(['@/components/Page'], resolve),
+      redirect: '/search',
       children: [
         {
           path: '/search',
