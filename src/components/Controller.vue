@@ -43,7 +43,7 @@
         type: Object,
         default () {
           return {
-            id: '29713638',
+            id: '478303470',
             img: 'http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg',
             title: '心做し',
             author: '双笙'
@@ -54,7 +54,7 @@
     },
     data () {
       return {
-        url: '',
+        url: 'http://m10.music.126.net/20180217224102/b4bbf79eaf78d8193ff46efd6b252293/ymusic/cb56/cf61/0791/8ce4f3adde3b8ef67193a55a59b8c4dc.mp3',
         playing: false,
         music: this.$refs.song
       }
@@ -69,12 +69,19 @@
       },
       url (val) {  // 音乐url改变 播放音乐
         if(val){
-          this.playing = true
-          // this.music.autoplay = true
+          this.music.autoplay = true
           // this.play()
+          this.playing = true
+          // console.log(this.music.autoplay)
+          // this.music.loadstart = () => {
+          //   this.music.autoplay = true
+          //   this.playing = true
+          //   console.log('load start')
+          // }
         }
       },
       id (val) {  // 音乐id改变 获取音乐
+        console.log(val)
         this.getSong()
       }
     },
@@ -87,10 +94,8 @@
     methods: {
       playSong () {
         this.playing = !this.playing
-        // this.getSong()  // 获取音乐url
       },
       play () {
-        this.music.autoplay = true
         try {
           this.music.play()
         } catch (error) {

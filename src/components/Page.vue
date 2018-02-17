@@ -28,7 +28,7 @@
     data () {
       return {
         song: {
-          id: '29713638',
+          id: '478303470',
           img: 'http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg',
           title: '心做し',
           author: '双笙'
