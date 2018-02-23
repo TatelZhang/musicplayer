@@ -33,6 +33,13 @@
       </div>
       
     </div>
+    <div class="volumn">
+      <div class="middle" style="width:100%;">
+        <input type="range" v-model.number="volume" :style="volumeStyle" min=1 max=100>
+        <i class="fa fa-volume-up" v-if="volume>50"></i>
+        <i class="fa fa-volume-down" v-else></i>
+      </div>
+    </div>
   </div>
 </template>
 <script>
@@ -54,9 +61,10 @@
     },
     data () {
       return {
-        url: 'http://m10.music.126.net/20180217224102/b4bbf79eaf78d8193ff46efd6b252293/ymusic/cb56/cf61/0791/8ce4f3adde3b8ef67193a55a59b8c4dc.mp3',
+        url: 'http://up.mcyt.net/down/43014.mp3',
         playing: false,
-        music: this.$refs.song
+        music: this.$refs.song,
+        volume: 100
       }
     },
     watch: {
@@ -83,12 +91,20 @@
       id (val) {  // 音乐id改变 获取音乐
         console.log(val)
         this.getSong()
+      },
+      volume (val) {
+        // console.log(val)
+        this.music.volume = val/100
       }
     },
     computed: {
       id () {
         // this.song.id
         return this.song.id
+      },
+      volumeStyle () {
+        const len = this.volume
+        return `background: -webkit-linear-gradient(left, #6b7af1 0%, #6b7af1 ${len}%, #fff ${len}%, #fff 100%)`
       }
     },
     methods: {
@@ -109,7 +125,18 @@
           console.log(err)
         }
       },
+      wrapper () {
+        this.music.addEventListener('ended', (r) => {
+          this.playing = false
+        })
+        this.music.addEventListener('playing', (r) => {console.log(r)})
+      },
+      changeVolume () {
+        this.music.volume = 0;
+      },
       changeSong () {
+        this.music.volume = Math.random()
+        // console.log(this.music.volume)
       },
       getSong () {
         this.playing = false
@@ -121,6 +148,12 @@
     mounted () {
       // this.getSong()
       this.music = this.$refs.song
+      this.wrapper()
+      // console.log(this.music.volume)
+      // console.log(this.music.end)
+      // // this.music.ended = () => {
+      // //   console.log(1111)
+      // // }
     }
   }
 </script>
@@ -163,7 +196,7 @@
     font-weight: bold;
     font-size: 15px;
   }
-  .ctrl .operate .prev, .ctrl .operate .play, .ctrl .operate .next{
+  .ctrl .operate > *{
     height: 100%;
     width: 50px;
     position: relative;
@@ -171,7 +204,38 @@
   .prev:hover, .play:hover, .next:hover{
     color: #6b7ac0;
   }
+  .ctrl .volumn {
+    vertical-align: middle;
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    height: 100%;
+  }
   .middle i {
     cursor: pointer;
   }
+  .volumn div > * {
+    display: inline-block;
+    vertical-align: middle;
+    color: #6b7af1;
+    cursor: default;
+  }
+  .volumn input {
+    -webkit-appearance: none;
+    outline: none;
+    background: none;
+    height: 3px;
+    transition: 1s;
+  }
+  .volumn input::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    height: 13px;
+    width: 13px;
+    background-color: #6b7af1;
+    border-radius: 50%;
+    border: 1px solid #fff;
+  }
+  /* .volumn input:hover::-webkit-slider-thumb{
+    border-color: #fff;
+  } */
 </style>

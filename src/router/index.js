@@ -16,6 +16,11 @@ export default new Router({
           component: (resolve) => require(['@/components/Search'], resolve)
         }
       ]
+    },
+    {
+      path: '/test',
+      name: 'test',
+      component: (resolve) => require(['@/components/Test'], resolve)
     }
   ]
 })
