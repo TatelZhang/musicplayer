@@ -1,5 +1,11 @@
 <template>
   <div class="ctrl">
+    <div :class="['lyric', {show:lyricShow}]" :style="lyricStyle">
+        <div class="wrapper"></div>
+        <div style="color: #fff">
+          wsadasd
+        </div>
+    </div>
     <div class="info">
       <div class="pic">
         <img :src="song.img" alt="" class="img">
@@ -26,20 +32,35 @@
           <audio :src="url" style="display: none;" ref="song"></audio>
         </div>
       </div>
-      <div class="next" @click="changeSong">
+      <div class="next">
         <div class="middle">
           <i class="fa fa-forward"></i>
         </div>
       </div>
-      
+      <div class="cycle" style="width: 20px;">
+        <div class="middle">
+          <i class="fa fa-random"></i>
+        </div>
+      </div>
+      <div :class="['lrc', {active: lyricShow}]">
+        <div class="middle">
+          <span @click="showLrc">词</span>
+        </div>
+      </div>
     </div>
     <div class="volumn">
       <div class="middle" style="width:100%;">
+        <span style="display:inline-block; width:15px;">
+          <i class="fa fa-volume-up" v-if="volume>50"></i>
+          <i class="fa fa-volume-down" v-else></i>
+        </span>
         <input type="range" v-model.number="volume" :style="volumeStyle" min=1 max=100>
-        <i class="fa fa-volume-up" v-if="volume>50"></i>
-        <i class="fa fa-volume-down" v-else></i>
       </div>
     </div>
+    <div class="progress">
+      <input type="range" v-model="progress" :style="progressStyle" @click="changeProgress" :max="duration">
+    </div>
+    
   </div>
 </template>
 <script>
@@ -64,7 +85,10 @@
         url: 'http://up.mcyt.net/down/43014.mp3',
         playing: false,
         music: this.$refs.song,
-        volume: 100
+        volume: 20,
+        progress: 0,
+        duration: 0,
+        lyricShow: false
       }
     },
     watch: {
@@ -78,14 +102,7 @@
       url (val) {  // 音乐url改变 播放音乐
         if(val){
           this.music.autoplay = true
-          // this.play()
           this.playing = true
-          // console.log(this.music.autoplay)
-          // this.music.loadstart = () => {
-          //   this.music.autoplay = true
-          //   this.playing = true
-          //   console.log('load start')
-          // }
         }
       },
       id (val) {  // 音乐id改变 获取音乐
@@ -93,7 +110,6 @@
         this.getSong()
       },
       volume (val) {
-        // console.log(val)
         this.music.volume = val/100
       }
     },
@@ -102,58 +118,70 @@
         // this.song.id
         return this.song.id
       },
-      volumeStyle () {
+      volumeStyle () {  // 声音进度样式控制
         const len = this.volume
         return `background: -webkit-linear-gradient(left, #6b7af1 0%, #6b7af1 ${len}%, #fff ${len}%, #fff 100%)`
+      },
+      progressStyle () {   // 播放进度样式控制
+        const curr = Number(this.progress)
+        const len = curr / Number(this.duration) * 100
+        return `background: -webkit-linear-gradient(left, #6b7af1 0%, #6b7af1 ${len}%, #eee ${len +2}%,#fff ${len +2}%, #fff 100%)`
+      },
+      lyricStyle () {
+        // return `backgr`
+        return 
       }
     },
     methods: {
-      playSong () {
+      playSong () { // 更改当前播放状态
         this.playing = !this.playing
       },
-      play () {
+      play () { //播放音乐
         try {
           this.music.play()
         } catch (error) {
           console.log(error)
         }
       },
-      pause () {
+      pause () { // 暂停播放
         try {
           this.music.pause()
         } catch (err){
           console.log(err)
         }
       },
-      wrapper () {
+      initDefalt () {   // 初始化audio DOM
+        this.music.volume = this.volume/100;
         this.music.addEventListener('ended', (r) => {
           this.playing = false
         })
-        this.music.addEventListener('playing', (r) => {console.log(r)})
+        this.music.addEventListener('timeupdate', ({target}) => {   // 进度条控制
+          this.duration = target.duration     // 获取音乐长度
+          this.progress = target.currentTime  // 获取音乐当前进度
+        })
+        this.music.addEventListener('loadeddata', (e) => {  // 媒体的第一帧加载完毕
+          const {target, srcElement} = e
+          // console.log(target.duration)
+          this.duration = target.duration
+          this.progress = 0
+        })
       },
-      changeVolume () {
-        this.music.volume = 0;
-      },
-      changeSong () {
-        this.music.volume = Math.random()
-        // console.log(this.music.volume)
-      },
-      getSong () {
+      getSong () {  // 获取音乐链接
         this.playing = false
         axios.get('/api/music/url', {params: {id: this.id}}).then(({status, data}) => {
           this.url = data.data[0].url
         })
+      },
+      changeProgress () {  // 更改音乐当前进度
+        this.music.currentTime = this.progress
+      },
+      showLrc () {
+        this.lyricShow = !this.lyricShow
       }
     },
     mounted () {
-      // this.getSong()
-      this.music = this.$refs.song
-      this.wrapper()
-      // console.log(this.music.volume)
-      // console.log(this.music.end)
-      // // this.music.ended = () => {
-      // //   console.log(1111)
-      // // }
+      this.music = this.$refs.song  // 获取audio DOM 节点
+      this.initDefalt()
     }
   }
 </script>
@@ -162,10 +190,14 @@
     height: 100%;
     width: 100%;
   }
-  .ctrl .info, .ctrl .info .pic, .ctrl .info .desc, .ctrl .operate, .ctrl .operate > *{
+  .ctrl > * , .ctrl > * > * {
     display: inline-block;
   }
+  /* .ctrl .info .pic, .ctrl .info .desc, .ctrl .operate, .ctrl .operate > *{
+    display: inline-block;
+  } */
   .ctrl .info {
+    transform: translateX(0);
     height: 100%;
     width: 300px;
   }
@@ -189,7 +221,7 @@
   }
   .ctrl .operate {
     color: #6b7af1;
-    width: 250px;
+    /* width: 150px; */
     height: 100%;
     vertical-align: middle;
     position: relative;
@@ -201,6 +233,16 @@
     width: 50px;
     position: relative;
   }
+  .ctrl .operate .cycle{
+
+  }
+  .ctrl .operate .lrc span {
+    color: #b4bed0;
+    cursor: pointer;
+  }
+  .ctrl .operate .lrc.active span{
+    color: #6b7af1;
+  }
   .prev:hover, .play:hover, .next:hover{
     color: #6b7ac0;
   }
@@ -208,7 +250,7 @@
     vertical-align: middle;
     position: relative;
     display: inline-block;
-    width: 200px;
+    width: 160px;
     height: 100%;
   }
   .middle i {
@@ -234,6 +276,61 @@
     background-color: #6b7af1;
     border-radius: 50%;
     border: 1px solid #fff;
+  }
+  .ctrl .progress {
+    display: block;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    height: 3px;
+  }
+  .ctrl .progress input {
+    cursor: pointer;
+    position: absolute;
+    background: #eee;
+    top: 0;
+    width: 100%;
+    -webkit-appearance: none;
+    outline: none;
+    height: 3px;
+    border-radius: 10px;
+  }
+  .ctrl .progress input::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    height: 10px;
+    height: 3px;
+    width: 3px;
+    background: #6b7af1;
+    border-radius: 10px;
+  }
+  .ctrl .lyric {
+    position: fixed;
+    top: 100%;
+    left: 20%;
+    width: 80%;
+    height: 100%;
+    transition: top .3s;
+    overflow: hidden;
+  }
+  .ctrl .lyric.show {
+    
+    top: 0;
+   
+    /* background-size: cover; */
+    /* filter: blur(60px);
+    background-image: url(http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg); */
+    /* border:1px solid red; */
+  }
+  .ctrl .lyric .wrapper{
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    filter: contrast(100%);
+    background-size: cover;
+    background-image: url(http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg);
   }
   /* .volumn input:hover::-webkit-slider-thumb{
     border-color: #fff;
