@@ -1,9 +1,13 @@
 <template>
   <div class="ctrl">
-    <div :class="['lyric', {show:lyricShow}]" :style="lyricStyle">
-        <div class="wrapper"></div>
-        <div style="color: #fff">
-          wsadasd
+    <div :class="['lyric', {show:lyricShow}]">
+        <div class="wrapper" :style="wrapperImg"></div>
+        <div class="lrc-container" ref="lrc">
+          <div class="pice" v-if="!lyric.length">抱歉，暂无歌词</div>
+          <div v-for="item in lyric" class="pice" :class="{active: isCurrLrc === item[0]}">
+            <div class="self" @click="lrcChangeProgress(item[0])">{{item[1]}}</div>
+            <!-- <div class="extra">ssss</div> -->
+          </div>
         </div>
     </div>
     <div class="info">
@@ -64,6 +68,27 @@
   </div>
 </template>
 <script>
+  const lrc = "[by:love_hassy] [00:00.00] 作曲 : 蝶々P [00:00.580] 作词 : 蝶々P [00:01.740]ねぇもしも [00:03.900]全て投げ捨てられたら [00:07.480]笑って生きることが楽になるの [00:12.900]また胸が痛くなるから [00:17.300]もう何も言わないでよ [00:23.030] [00:47.400]ねぇもしも [00:48.900]全て忘れられたなら [00:52.850]泣かないで生きることも 楽になるの [00:58.730]でもそんな事出来ないから [01:02.910]もう何も見せないでよ [01:08.520]君にどれだけ近づいても [01:14.300]僕の心臓は一つだけ [01:20.520]酷いよ酷いよ [01:22.720]もういっそ僕の体を [01:25.720]壊して引き裂いて [01:28.600]好きなようにしてよ [01:31.300]叫んで藻掻いて [01:34.100]瞼を腫らしても [01:37.000]まだ君は僕の事を [01:39.850]抱きしめて離さない [01:42.760]もういいよ [01:46.800] [01:55.640]ねぇもしも [01:57.750]僕の願いが叶うなら [02:01.150]君と同じものが欲しいんだ [02:06.700]でも僕には存在しないから [02:11.450]じゃあ せめて此処に来てよ [02:18.350] [02:21.100]あ [02:42.300]君にどれだけ愛されても [02:48.090]僕の心臓は一つだけ [02:53.780]やめてよやめてよ [02:56.500]優しくしないでよ [02:59.390]どうしても僕には [03:02.300]理解ができないよ [03:05.060]痛いよ痛いよ [03:08.010]言葉で教えてよ [03:10.800]こんなの知らないよ [03:13.660]独りにしないで [03:16.600]酷いよ酷いよ [03:19.180]もういっそ僕の体を [03:22.210]壊して引き裂いて [03:24.970]好きなようにしてよ [03:27.800]叫んで藻掻いて [03:30.550]瞼を腫らしても [03:33.540]まだ君は僕の事を [03:36.250]抱きしめて離さない [03:39.290]もういいよ [03:45.510] [04:03.590]ねぇもしも [04:04.870]僕に心があるなら [04:09.060]どうやってそれを 見つければいいの [04:14.800]少し微笑んで君が言う [04:19.130]「それはねここにあるよ」 [04:24.560] "
+  function solveLrc (lrc) {
+    const lrcArr = []
+    const pattern = /(\[\d{2}:\d{2}\.\d*\]\s+)*\[\d{2}:\d{2}\.\d*\][^\[]*/g  // 用于匹配歌词单元的正则表达式
+    const p2 = /\[\d{2}:\d{2}\.\d*\]/g   // 时间正则表达式
+    const res = lrc.match(pattern)
+    res.map((item)=>{
+      const lrcItem = item.replace(p2, '').trim() // 获取歌词
+      const r = item.match(p2)  // 获取时间 ['[]','[]']
+      Array.prototype.forEach.call(r, (unit)=> {
+        const t = unit.slice(1, -1).split(':')
+        const tr = (parseInt(t[0], 10)*60 + parseFloat(t[1])).toFixed(3)
+        lrcArr.push([Number(tr), lrcItem])
+      })
+    })
+    const rrr = lrcArr.sort((x, y) => {
+      return x[0] - y[0]
+    })
+    // console.log(rrr)
+    return rrr
+  }
   export default {
     props: {
       // id: {type: String, default: '29713638'}
@@ -83,12 +108,15 @@
     data () {
       return {
         url: 'http://up.mcyt.net/down/43014.mp3',
-        playing: false,
-        music: this.$refs.song,
-        volume: 20,
-        progress: 0,
-        duration: 0,
-        lyricShow: false
+        playing: false,      // 播放状态
+        music: this.$refs.song,  // 媒体节点
+        volume: 20,     // 歌曲声音*100
+        progress: 0,   // 歌曲进度
+        duration: 0,    // 歌曲长度
+        lyricShow: false,
+        lyric: [],    // 歌词容器
+        tlyric: [],   // 译词
+        lrcIndex: 0   // 用于调整歌词高度
       }
     },
     watch: {
@@ -106,11 +134,19 @@
         }
       },
       id (val) {  // 音乐id改变 获取音乐
-        console.log(val)
+        // console.log(val)
         this.getSong()
+        this.getLyric()
       },
       volume (val) {
         this.music.volume = val/100
+      },
+      progress (val) {
+        // console.log(val)
+      },
+      lrcIndex (val) {
+        this.$refs.lrc.scrollTop = val * 60
+        // console.log(this.$refs.lrc.scrollTo)
       }
     },
     computed: {
@@ -125,11 +161,35 @@
       progressStyle () {   // 播放进度样式控制
         const curr = Number(this.progress)
         const len = curr / Number(this.duration) * 100
-        return `background: -webkit-linear-gradient(left, #6b7af1 0%, #6b7af1 ${len}%, #eee ${len +2}%,#fff ${len +2}%, #fff 100%)`
+        return `background: -webkit-linear-gradient(left, #6b7af1 0%, #6b7af1 ${len}%, #eee ${len +2}%,#eee ${len +2}%, #eee 100%)`
       },
-      lyricStyle () {
+      wrapperImg () {
         // return `backgr`
-        return 
+        return `background-image: url(${this.song.img});`
+      },
+      isCurrLrc () {
+        const cur = this.lrcTime
+        // let t = 0
+        if(!this.lyric.length) return ;
+        for(let [k, v] of this.lyric.entries()){
+          // console.log(v)
+          if(cur >=(parseInt(v[0]) - 1) && cur < (this.lyric[k+1] ? this.lyric[k+1][0]:cur + 1)){
+            this.lrcIndex = k
+            // console.log(k)
+            return v[0]
+          }
+        }
+        // this.lyric.forEach((item, index, arr) => {
+        //   if(cur >= parseInt(item[0]) && cur < arr[index+1][0]){
+        //     t = item[0]
+        //     return 
+        //   }
+        //   console.log(item)
+        // })
+        // return t
+      },
+      lrcTime () {
+        return parseInt(this.progress)
       }
     },
     methods: {
@@ -161,7 +221,6 @@
         })
         this.music.addEventListener('loadeddata', (e) => {  // 媒体的第一帧加载完毕
           const {target, srcElement} = e
-          // console.log(target.duration)
           this.duration = target.duration
           this.progress = 0
         })
@@ -175,6 +234,19 @@
       changeProgress () {  // 更改音乐当前进度
         this.music.currentTime = this.progress
       },
+      getLyric () {
+        axios.get('/api/lyric', {params: {id: this.id}}).then(({status, data}) => {
+          if(status === 200 && data.code === 200) {
+            this.lyric = solveLrc(data.lrc.lyric)
+            this.lrcIndex = 0
+          }else{
+            this.lyric = []
+          }
+        })
+      },
+      lrcChangeProgress (val) {
+        this.music.currentTime = val
+      },
       showLrc () {
         this.lyricShow = !this.lyricShow
       }
@@ -182,6 +254,7 @@
     mounted () {
       this.music = this.$refs.song  // 获取audio DOM 节点
       this.initDefalt()
+      this.lyric = solveLrc(lrc)
     }
   }
 </script>
@@ -311,6 +384,7 @@
     height: 100%;
     transition: top .3s;
     overflow: hidden;
+    background-color: #f3f7f9;
   }
   .ctrl .lyric.show {
     
@@ -330,9 +404,40 @@
     left: 0;
     filter: contrast(100%);
     background-size: cover;
-    background-image: url(http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg);
+    background-color: #4c534c;
+    /* background-image: url(http://p1.music.126.net/6y-UleORITEDbvrOLV0Q8A==/5639395138885805.jpg); */
   }
   /* .volumn input:hover::-webkit-slider-thumb{
     border-color: #fff;
   } */
+  .ctrl .lrc-container {
+    user-select: none;
+    position: relative;
+    width: 600px;
+    height: 60%;
+    margin-left: 50%;
+    margin-top: 10%;
+    transform: translateX(-50%);
+    overflow: auto;
+    text-align: center;
+    padding-top: 120px; 
+  }
+  .ctrl .lrc-container .pice{
+    color: #fff;
+    height: 50px;
+    font-family: '微润雅黑';
+    margin-bottom: 10px;
+    transition: color .5s;
+  }
+  .ctrl .lrc-container .pice.active {
+    color: #31c27c;
+    font-weight: bold;
+  }
+  .ctrl .lrc-container .pice .self {
+    
+    cursor: pointer;
+  }
+  .ctrl .lrc-container::-webkit-scrollbar{
+    -webkit-appearance: none;
+  }
 </style>
