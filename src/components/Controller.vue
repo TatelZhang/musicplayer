@@ -227,7 +227,7 @@
       },
       getSong () {  // 获取音乐链接
         this.playing = false
-        axios.get('/api/music/url', {params: {id: this.id}}).then(({status, data}) => {
+        axios.get('/music/music/url', {params: {id: this.id}}).then(({status, data}) => {
           this.url = data.data[0].url
         })
       },
@@ -235,7 +235,7 @@
         this.music.currentTime = this.progress
       },
       getLyric () {
-        axios.get('/api/lyric', {params: {id: this.id}}).then(({status, data}) => {
+        axios.get('/music/lyric', {params: {id: this.id}}).then(({status, data}) => {
           if(status === 200 && data.code === 200) {
             this.lyric = solveLrc(data.lrc.lyric)
             this.lrcIndex = 0

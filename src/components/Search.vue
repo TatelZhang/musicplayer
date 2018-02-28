@@ -46,7 +46,7 @@
         params.keywords = this.keywords
         params.limit = '10'
         params.offset = 0
-        axios.get('/api/search', {params}).then(({status, data}) => {
+        axios.get('/music/search', {params}).then(({status, data}) => {
           if(status === 200 && data.code === 200) {
             this.songs = data.result.songs
           }

@@ -11,10 +11,10 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api/': {
+      '/music/': {
         target: 'http://www.tatelzhang.com/music/',
         pathRewrite: {
-          '^/api/': ''
+          '^/music/': ''
         }
       }
     },

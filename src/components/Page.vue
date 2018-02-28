@@ -38,7 +38,7 @@
     },
     methods: {
       test () {
-        // axios.get('/api/search?keywords=海阔天空').then(res => {
+        // axios.get('/music/search?keywords=海阔天空').then(res => {
         //   console.log(res)
         // })
         this.song.id = 451113443
